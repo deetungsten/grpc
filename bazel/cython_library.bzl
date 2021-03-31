@@ -6,7 +6,7 @@
 # been written at cython/cython and tensorflow/tensorflow. We branch from
 # Tensorflow's version as it is more actively maintained and works for gRPC
 # Python's needs.
-def pyx_library(name, deps = [], py_deps = [], srcs = [], **kwargs):
+def pyx_library(name, deps=[], cc_kwargs={}, py_deps=[], srcs=[], **kwargs)::
     """Compiles a group of .pyx / .pxd / .py files.
 
     First runs Cython to create .cpp files for each input .pyx or .py + .pxd
@@ -56,10 +56,11 @@ def pyx_library(name, deps = [], py_deps = [], srcs = [], **kwargs):
         stem = src.split(".")[0]
         shared_object_name = stem + ".so"
         native.cc_binary(
-            name = shared_object_name,
-            srcs = [stem + ".cpp"],
-            deps = deps + ["@local_config_python//:python_headers"],
-            linkshared = 1,
+            name=cc_kwargs.pop("name", shared_object_name),
+            srcs=[stem + ".cpp"] + cc_kwargs.pop("srcs", []),
+            deps=deps + ["@local_config_python//:python_headers"] + cc_kwargs.pop("deps", []),
+            linkshared=cc_kwargs.pop("linkshared", 1),
+            **cc_kwargs
         )
         shared_objects.append(shared_object_name)
 
