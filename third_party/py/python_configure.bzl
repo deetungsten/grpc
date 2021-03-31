@@ -177,7 +177,7 @@ def _get_bash_bin(repository_ctx):
     if bash_bin != None:
         return bash_bin
     else:
-        bash_bin_path = repository_ctx.which("bash")
+        bash_bin_path = repository_ctx.which("bash" if not _is_windows(repository_ctx) else "sh.exe")
         if bash_bin_path != None:
             return str(bash_bin_path)
         else:
@@ -208,7 +208,7 @@ def _get_python_lib(repository_ctx, python_bin, lib_path_key):
         "    paths.append(path)\n" + "if len(paths) >=1:\n" +
         "  print(paths[0])\n" + "END"
     )
-    cmd = "%s - %s" % (python_bin, print_lib)
+    cmd = '"%s" - %s' % (python_bin, print_lib)
     result = repository_ctx.execute([_get_bash_bin(repository_ctx), "-c", cmd])
     return result.stdout.strip("\n")
 
@@ -348,7 +348,7 @@ def _python_autoconf_impl(repository_ctx):
         repository_ctx,
         "_python2",
         _PYTHON2_BIN_PATH,
-        "python",
+        "python" if not _is_windows(repository_ctx) else "python.exe",
         _PYTHON2_LIB_PATH,
         True
     )
@@ -356,7 +356,7 @@ def _python_autoconf_impl(repository_ctx):
         repository_ctx,
         "_python3",
         _PYTHON3_BIN_PATH,
-        "python3",
+        "python3" if not _is_windows(repository_ctx) else "python.exe",
         _PYTHON3_LIB_PATH,
         False
     )
